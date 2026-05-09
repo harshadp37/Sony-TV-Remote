@@ -58,7 +58,7 @@ object SonyCodes {
     // --- Menu / Navigation ---
     val HOME = SonyIrCommand("Home", 96, TV_ADDR_12, SircProtocol.SIRC_12, adbKeyCode = "KEYCODE_HOME")
     val BACK = SonyIrCommand("Back", 35, TV_ADDR_15, SircProtocol.SIRC_15, adbKeyCode = "KEYCODE_BACK")
-    val MENU = SonyIrCommand("Menu", 54, TV_ADDR_15, SircProtocol.SIRC_15, adbKeyCode = "KEYCODE_SETTINGS")
+    val MENU = SonyIrCommand("Menu", 54, TV_ADDR_15, SircProtocol.SIRC_15)
 
     // --- Input ---
     val INPUT = SonyIrCommand("Input", 37, TV_ADDR_12, SircProtocol.SIRC_12, adbKeyCode = "KEYCODE_TV_INPUT")
