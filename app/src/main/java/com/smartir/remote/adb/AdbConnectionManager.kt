@@ -122,6 +122,21 @@ class AdbConnectionManager(private val context: Context) {
         }
     }
 
+    suspend fun sendKeyEvent(keyCode: String): Boolean {
+        val connection = dadb ?: return false
+        return withContext(Dispatchers.IO) {
+            try {
+                connection.shell("input keyevent $keyCode")
+                Log.d(TAG, "ADB keyevent: $keyCode")
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "ADB keyevent failed: ${e.message}", e)
+                handleConnectionError(e)
+                false
+            }
+        }
+    }
+
     suspend fun discoverTvs(): List<String> {
         return SubnetScanner.scan(context)
     }

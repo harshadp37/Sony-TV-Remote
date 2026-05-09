@@ -35,7 +35,7 @@ private fun AppRow(
     isConnected: Boolean
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         apps.forEach { app ->
@@ -43,12 +43,14 @@ private fun AppRow(
                 onClick = { viewModel.launchTvApp(app) },
                 label = app.name,
                 enabled = isConnected,
-                size = 52.dp,
-                backgroundColor = app.color.copy(alpha = 0.85f),
+                size = 40.dp,
+                width = 96.dp,
+                backgroundColor = app.color,
+                gradientEndColor = app.colorEnd,
                 pressedColor = app.color.copy(alpha = 0.6f),
                 contentColor = Color.White,
                 shadowColor = app.color,
-                elevation = 12.dp
+                elevation = 8.dp
             )
         }
     }

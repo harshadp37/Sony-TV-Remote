@@ -37,10 +37,22 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
 
     init {
         Log.d(TAG, "IR blaster available: ${irTransmitter.hasIrEmitter}")
+        autoConnect()
+    }
+
+    private fun autoConnect() {
+        viewModelScope.launch {
+            val lastIp = adbManager.preferences.getLastIp()
+            if (lastIp != null) {
+                Log.d(TAG, "Auto-connecting to last known TV: $lastIp")
+                adbManager.connect(lastIp)
+            }
+        }
     }
 
     /**
-     * Send a single command (3-frame burst). Use for tap actions.
+     * Send a single command. Prefers ADB when connected and the command has an
+     * adbKeyCode mapping; falls back to IR (3-frame burst) otherwise.
      */
     fun sendCommand(command: SonyIrCommand, view: View) {
         // Cancel any ongoing repeat
@@ -48,9 +60,14 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
         repeatJob = null
 
         viewModelScope.launch {
-            Log.d(TAG, "Sending: ${command.name}")
+            val useAdb = adbState.value is AdbConnectionState.Connected && command.adbKeyCode != null
+            Log.d(TAG, "Sending: ${command.name} via ${if (useAdb) "ADB" else "IR"}")
             try {
-                irTransmitter.transmit(command, singleFrame = false)
+                if (useAdb) {
+                    adbManager.sendKeyEvent(command.adbKeyCode!!)
+                } else {
+                    irTransmitter.transmit(command, singleFrame = false)
+                }
                 withContext(Dispatchers.Main) {
                     if (command == SonyCodes.POWER) {
                         HapticManager.confirm(view)
@@ -59,36 +76,48 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "IR transmit failed: ${e.message}", e)
+                Log.e(TAG, "Command failed: ${e.message}", e)
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(app, "IR error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(app, "Command error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
     /**
-     * Start hold-to-repeat: sends full 3-frame bursts at ~200ms intervals.
-     * Each burst is treated as a distinct key press by the TV.
+     * Start hold-to-repeat: sends key events at ~200ms intervals.
+     * Uses ADB keyevent when connected, IR 3-frame bursts otherwise.
      * Cancels any previous repeat job (only one signal at a time).
      */
     fun startRepeat(command: SonyIrCommand, view: View) {
         repeatJob?.cancel()
         repeatJob = viewModelScope.launch {
-            // Send initial burst immediately
-            irTransmitter.transmit(command, singleFrame = false)
+            // Send initial press immediately
+            sendSinglePress(command)
             withContext(Dispatchers.Main) {
                 HapticManager.tick(view)
             }
 
-            // Repeat with full 3-frame bursts so the TV registers each as a new press
+            // Repeat so the TV registers each as a new press
             while (isActive) {
                 delay(REPEAT_INTERVAL_MS)
-                irTransmitter.transmit(command, singleFrame = false)
+                sendSinglePress(command)
                 withContext(Dispatchers.Main) {
                     HapticManager.tick(view)
                 }
             }
+        }
+    }
+
+    /**
+     * Send a single key press via ADB (preferred) or IR (fallback).
+     */
+    private suspend fun sendSinglePress(command: SonyIrCommand) {
+        val useAdb = adbState.value is AdbConnectionState.Connected && command.adbKeyCode != null
+        if (useAdb) {
+            adbManager.sendKeyEvent(command.adbKeyCode!!)
+        } else {
+            irTransmitter.transmit(command, singleFrame = false)
         }
     }
 

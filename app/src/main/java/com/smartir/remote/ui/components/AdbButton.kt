@@ -4,7 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
@@ -37,7 +41,9 @@ fun AdbButton(
     label: String? = null,
     enabled: Boolean = true,
     size: Dp = 56.dp,
+    width: Dp? = null,
     backgroundColor: Color = ButtonDefault,
+    gradientEndColor: Color? = null,
     pressedColor: Color = ButtonPressed,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     disabledColor: Color = Color(0xFF1A1A2A),
@@ -51,12 +57,22 @@ fun AdbButton(
     val view = LocalView.current
     val shape = RoundedCornerShape(20.dp)
 
-    val bgColor = when {
-        !enabled -> disabledColor
-        isPressed -> pressedColor
-        else -> backgroundColor
-    }
     val fgColor = if (enabled) contentColor else disabledContentColor
+
+    val sizeModifier = if (width != null) Modifier.width(width).height(size) else Modifier.size(size)
+
+    val bgModifier = when {
+        !enabled -> Modifier.background(disabledColor)
+        isPressed -> Modifier.background(pressedColor)
+        gradientEndColor != null -> Modifier.background(
+            Brush.linearGradient(
+                colors = listOf(backgroundColor, gradientEndColor),
+                start = Offset.Zero,
+                end = Offset.Infinite
+            )
+        )
+        else -> Modifier.background(backgroundColor)
+    }
 
     Box(
         modifier = modifier
@@ -66,9 +82,9 @@ fun AdbButton(
                 ambientColor = shadowColor.copy(alpha = 0.6f),
                 spotColor = shadowColor.copy(alpha = 0.6f)
             )
-            .size(size)
+            .then(sizeModifier)
             .clip(shape)
-            .background(bgColor)
+            .then(bgModifier)
             .then(
                 if (enabled) {
                     Modifier.pointerInput(Unit) {
