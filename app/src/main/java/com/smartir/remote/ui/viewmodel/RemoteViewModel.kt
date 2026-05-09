@@ -7,12 +7,16 @@ import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.smartir.remote.haptics.HapticManager
+import com.smartir.remote.adb.AdbConnectionManager
+import com.smartir.remote.adb.AdbConnectionState
+import com.smartir.remote.adb.TvApp
 import com.smartir.remote.ir.IrTransmitter
 import com.smartir.remote.ir.SonyCodes
 import com.smartir.remote.ir.SonyIrCommand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,6 +24,8 @@ import kotlinx.coroutines.withContext
 class RemoteViewModel(application: Application) : AndroidViewModel(application) {
 
     val irTransmitter = IrTransmitter(application)
+    val adbManager = AdbConnectionManager(application)
+    val adbState: StateFlow<AdbConnectionState> = adbManager.state
 
     private var repeatJob: Job? = null
     private val app = application
@@ -92,5 +98,40 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
     fun stopRepeat() {
         repeatJob?.cancel()
         repeatJob = null
+    }
+
+    // --- ADB methods ---
+
+    fun connectAdb(ip: String) {
+        viewModelScope.launch {
+            adbManager.connect(ip)
+        }
+    }
+
+    fun disconnectAdb() {
+        viewModelScope.launch {
+            adbManager.disconnect()
+        }
+    }
+
+    fun launchTvApp(app: TvApp) {
+        viewModelScope.launch {
+            adbManager.launchApp(app)
+        }
+    }
+
+    fun sendVoiceText(text: String) {
+        viewModelScope.launch {
+            adbManager.sendTextInput(text)
+        }
+    }
+
+    fun discoverTvs(onResult: (List<String>) -> Unit) {
+        viewModelScope.launch {
+            val ips = adbManager.discoverTvs()
+            withContext(Dispatchers.Main) {
+                onResult(ips)
+            }
+        }
     }
 }

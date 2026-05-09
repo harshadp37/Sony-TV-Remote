@@ -34,3 +34,14 @@ val OkBlue = Color(0xFF3366CC)
 // On-surface
 val TextPrimary = Color(0xFFE8E8F0)
 val TextSecondary = Color(0xFF9898A8)
+
+// ADB connection status
+val AdbConnected = Color(0xFF4CAF50)
+val AdbDisconnected = Color(0xFF757575)
+val AdbConnecting = Color(0xFFFFC107)
+val AdbError = Color(0xFFE53935)
+
+// App brand colors
+val YouTubeRed = Color(0xFFFF0000)
+val HotstarBlue = Color(0xFF1F49E0)
+val MicPurple = Color(0xFF7C4DFF)
