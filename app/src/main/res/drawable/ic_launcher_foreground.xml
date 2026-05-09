@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Remote body (rounded rectangle) -->
+    <path
+        android:fillColor="#2A2A44"
+        android:pathData="M38,24 L70,24 Q76,24 76,30 L76,82 Q76,88 70,88 L38,88 Q32,88 32,82 L32,30 Q32,24 38,24z" />
+
+    <!-- D-Pad circle background -->
+    <path
+        android:fillColor="#1A1A2E"
+        android:pathData="M54,46 a11,11 0 1,0 0.01,0z" />
+
+    <!-- D-Pad center dot (OK button) -->
+    <path
+        android:fillColor="#4A6CF7"
+        android:pathData="M54,46 a4,4 0 1,0 0.01,0z" />
+
+    <!-- D-Pad up arrow -->
+    <path
+        android:fillColor="#8888BB"
+        android:pathData="M54,36.5 L57,40 L51,40z" />
+
+    <!-- D-Pad down arrow -->
+    <path
+        android:fillColor="#8888BB"
+        android:pathData="M54,55.5 L57,52 L51,52z" />
+
+    <!-- D-Pad left arrow -->
+    <path
+        android:fillColor="#8888BB"
+        android:pathData="M44.5,46 L47.5,43 L47.5,49z" />
+
+    <!-- D-Pad right arrow -->
+    <path
+        android:fillColor="#8888BB"
+        android:pathData="M63.5,46 L60.5,43 L60.5,49z" />
+
+    <!-- Power button (top) -->
+    <path
+        android:fillColor="#E74C3C"
+        android:pathData="M54,31 a3,3 0 1,0 0.01,0z" />
+
+    <!-- Bottom button row -->
+    <path
+        android:fillColor="#3A3A58"
+        android:pathData="M39,62 h6 v4 h-6z"
+        android:strokeWidth="0" />
+    <path
+        android:fillColor="#3A3A58"
+        android:pathData="M51,62 h6 v4 h-6z" />
+    <path
+        android:fillColor="#3A3A58"
+        android:pathData="M63,62 h6 v4 h-6z" />
+
+    <!-- Volume buttons -->
+    <path
+        android:fillColor="#3A3A58"
+        android:pathData="M39,70 h6 v4 h-6z" />
+    <path
+        android:fillColor="#3A3A58"
+        android:pathData="M63,70 h6 v4 h-6z" />
+
+    <!-- Mute button (amber) -->
+    <path
+        android:fillColor="#E67E22"
+        android:pathData="M51,70 h6 v4 h-6z" />
+
+    <!-- IR signal arcs (top of remote) -->
+    <path
+        android:strokeColor="#B0C6FF"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:pathData="M49,21 A7,7 0 0,1 59,21" />
+    <path
+        android:strokeColor="#B0C6FF"
+        android:strokeWidth="1.5"
+        android:fillColor="#00000000"
+        android:pathData="M46,18 A11,11 0 0,1 62,18" />
+</vector>

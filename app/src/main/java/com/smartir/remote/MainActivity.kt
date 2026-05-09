@@ -1,0 +1,59 @@
+package com.smartir.remote
+
+import android.os.Bundle
+import android.view.WindowManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.smartir.remote.ui.screens.RemoteScreen
+import com.smartir.remote.ui.theme.SmartIRRemoteTheme
+import com.smartir.remote.ui.viewmodel.RemoteViewModel
+
+class MainActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+        setContent {
+            SmartIRRemoteTheme {
+                val viewModel: RemoteViewModel = viewModel()
+                val snackbarHostState = remember { SnackbarHostState() }
+
+                // Check for IR blaster on launch
+                LaunchedEffect(Unit) {
+                    if (!viewModel.irTransmitter.hasIrEmitter) {
+                        snackbarHostState.showSnackbar(
+                            message = "No IR blaster detected on this device"
+                        )
+                    }
+                }
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    snackbarHost = {
+                        SnackbarHost(hostState = snackbarHostState) { data ->
+                            Snackbar(snackbarData = data)
+                        }
+                    }
+                ) { innerPadding ->
+                    RemoteScreen(
+                        viewModel = viewModel,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
+        }
+    }
+}

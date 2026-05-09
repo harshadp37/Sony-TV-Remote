@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D-Pad Design Suggestions</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a14;
+    color: #d0d0e8;
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 32px;
+    padding: 40px 16px;
+  }
+
+  .card {
+    background: #12121e;
+    border-radius: 28px;
+    padding: 24px;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid #2a2a40;
+    position: relative;
+  }
+  .tag {
+    position: absolute;
+    top: -13px; left: 50%; transform: translateX(-50%);
+    background: #6c5ce7; color: #fff;
+    font-size: 11px; font-weight: 700;
+    padding: 4px 14px; border-radius: 20px; white-space: nowrap;
+  }
+  .desc {
+    font-size: 10.5px; color: #777799; text-align: center;
+    margin-bottom: 20px; line-height: 1.5;
+  }
+
+  /* ========== 1: Current ========== */
+  .dpad-current {
+    width: 220px; height: 220px;
+    background: #1e1e30;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .dpad-current .arr {
+    position: absolute; background: #2a2a40; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #8888bb;
+  }
+  .dpad-current .arr.u { width: 68px; height: 46px; top: 8px; left: 50%; transform: translateX(-50%); }
+  .dpad-current .arr.d { width: 68px; height: 46px; bottom: 8px; left: 50%; transform: translateX(-50%); }
+  .dpad-current .arr.l { width: 46px; height: 68px; left: 8px; top: 50%; transform: translateY(-50%); }
+  .dpad-current .arr.r { width: 46px; height: 68px; right: 8px; top: 50%; transform: translateY(-50%); }
+  .dpad-current .ok {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 64px; height: 64px; background: #4a6cf7; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: #fff;
+    box-shadow: 0 4px 16px rgba(74,108,247,0.4);
+  }
+
+  /* ========== 2: Cross Shape ========== */
+  .dpad-cross {
+    width: 220px; height: 220px;
+    position: relative;
+  }
+  .dpad-cross .arm {
+    position: absolute; background: #1e1e30; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: #8888bb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transition: background 0.15s;
+  }
+  .dpad-cross .arm:hover { background: #2a2a40; }
+  .dpad-cross .arm.u { width: 72px; height: 72px; top: 0; left: 50%; transform: translateX(-50%); }
+  .dpad-cross .arm.d { width: 72px; height: 72px; bottom: 0; left: 50%; transform: translateX(-50%); }
+  .dpad-cross .arm.l { width: 72px; height: 72px; left: 0; top: 50%; transform: translateY(-50%); }
+  .dpad-cross .arm.r { width: 72px; height: 72px; right: 0; top: 50%; transform: translateY(-50%); }
+  .dpad-cross .ok {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 72px; height: 72px; background: #4a6cf7; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px; color: #fff;
+    box-shadow: 0 4px 16px rgba(74,108,247,0.4);
+    z-index: 1;
+  }
+
+  /* ========== 3: Ring Style ========== */
+  .dpad-ring {
+    width: 220px; height: 220px;
+    position: relative;
+  }
+  .dpad-ring .outer {
+    width: 220px; height: 220px;
+    border: 3px solid #2a2a40;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 30px rgba(74,108,247,0.1);
+  }
+  .dpad-ring .seg {
+    position: absolute;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: #6666aa;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: #1e1e30;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .dpad-ring .seg:hover { background: #2a2a40; color: #aaaadd; }
+  .dpad-ring .seg.u { top: 2px; left: 50%; transform: translateX(-50%); }
+  .dpad-ring .seg.d { bottom: 2px; left: 50%; transform: translateX(-50%); }
+  .dpad-ring .seg.l { left: 2px; top: 50%; transform: translateY(-50%); }
+  .dpad-ring .seg.r { right: 2px; top: 50%; transform: translateY(-50%); }
+  .dpad-ring .ok {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 80px; height: 80px; background: #4a6cf7; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; color: #fff;
+    box-shadow: 0 4px 20px rgba(74,108,247,0.5);
+  }
+
+  /* ========== 4: Rounded Square ========== */
+  .dpad-square {
+    width: 220px; height: 220px;
+    background: #1e1e30;
+    border-radius: 32px;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .dpad-square .arr {
+    position: absolute; background: #2a2a40; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #8888bb;
+  }
+  .dpad-square .arr.u { width: 72px; height: 48px; top: 10px; left: 50%; transform: translateX(-50%); }
+  .dpad-square .arr.d { width: 72px; height: 48px; bottom: 10px; left: 50%; transform: translateX(-50%); }
+  .dpad-square .arr.l { width: 48px; height: 72px; left: 10px; top: 50%; transform: translateY(-50%); }
+  .dpad-square .arr.r { width: 48px; height: 72px; right: 10px; top: 50%; transform: translateY(-50%); }
+  .dpad-square .ok {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 64px; height: 64px; background: #4a6cf7; border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: #fff;
+    box-shadow: 0 4px 16px rgba(74,108,247,0.4);
+  }
+
+  /* ========== 5: Diamond ========== */
+  .dpad-diamond {
+    width: 220px; height: 220px;
+    position: relative;
+  }
+  .dpad-diamond .bg {
+    position: absolute;
+    width: 160px; height: 160px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background: #1e1e30;
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .dpad-diamond .arr {
+    position: absolute;
+    width: 52px; height: 52px;
+    background: #2a2a40;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #8888bb;
+    z-index: 1;
+  }
+  .dpad-diamond .arr.u { top: 4px; left: 50%; transform: translateX(-50%); }
+  .dpad-diamond .arr.d { bottom: 4px; left: 50%; transform: translateX(-50%); }
+  .dpad-diamond .arr.l { left: 4px; top: 50%; transform: translateY(-50%); }
+  .dpad-diamond .arr.r { right: 4px; top: 50%; transform: translateY(-50%); }
+  .dpad-diamond .ok {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 60px; height: 60px; background: #4a6cf7; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: #fff;
+    box-shadow: 0 4px 16px rgba(74,108,247,0.4);
+    z-index: 2;
+  }
+
+  /* ========== 6: Minimal Dots ========== */
+  .dpad-dots {
+    width: 200px; height: 200px;
+    position: relative;
+  }
+  .dpad-dots .dot {
+    position: absolute;
+    width: 56px; height: 56px;
+    background: #1e1e30;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: #8888bb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .dpad-dots .dot:hover { background: #2a2a40; }
+  .dpad-dots .dot.u { top: 0; left: 50%; transform: translateX(-50%); }
+  .dpad-dots .dot.d { bottom: 0; left: 50%; transform: translateX(-50%); }
+  .dpad-dots .dot.l { left: 0; top: 50%; transform: translateY(-50%); }
+  .dpad-dots .dot.r { right: 0; top: 50%; transform: translateY(-50%); }
+  .dpad-dots .ok {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 64px; height: 64px; background: #4a6cf7; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px; color: #fff;
+    box-shadow: 0 4px 20px rgba(74,108,247,0.5);
+  }
+
+  /* ========== 7: Glow Neon ========== */
+  .dpad-neon {
+    width: 220px; height: 220px;
+    background: #0f0f1a;
+    border-radius: 50%;
+    position: relative;
+    border: 2px solid #4a6cf733;
+    box-shadow: 0 0 40px rgba(74,108,247,0.15), inset 0 0 30px rgba(74,108,247,0.05);
+  }
+  .dpad-neon .arr {
+    position: absolute; background: transparent;
+    border: 2px solid #4a6cf755;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #4a6cf7;
+    box-shadow: 0 0 8px rgba(74,108,247,0.2);
+  }
+  .dpad-neon .arr:hover { background: #4a6cf715; box-shadow: 0 0 16px rgba(74,108,247,0.4); }
+  .dpad-neon .arr.u { width: 66px; height: 44px; top: 10px; left: 50%; transform: translateX(-50%); }
+  .dpad-neon .arr.d { width: 66px; height: 44px; bottom: 10px; left: 50%; transform: translateX(-50%); }
+  .dpad-neon .arr.l { width: 44px; height: 66px; left: 10px; top: 50%; transform: translateY(-50%); }
+  .dpad-neon .arr.r { width: 44px; height: 66px; right: 10px; top: 50%; transform: translateY(-50%); }
+  .dpad-neon .ok {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 64px; height: 64px;
+    background: transparent;
+    border: 2px solid #4a6cf7;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: #4a6cf7;
+    box-shadow: 0 0 20px rgba(74,108,247,0.4), inset 0 0 12px rgba(74,108,247,0.15);
+  }
+
+  /* ========== 8: Joystick Style ========== */
+  .dpad-joy {
+    width: 220px; height: 220px;
+    background: radial-gradient(circle at 50% 50%, #252540 0%, #1a1a2e 70%);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: inset 0 4px 12px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .dpad-joy .dir {
+    position: absolute;
+    font-size: 14px; color: #555577;
+    font-weight: 600;
+    letter-spacing: 2px;
+  }
+  .dpad-joy .dir.u { top: 16px; left: 50%; transform: translateX(-50%); }
+  .dpad-joy .dir.d { bottom: 16px; left: 50%; transform: translateX(-50%); }
+  .dpad-joy .dir.l { left: 14px; top: 50%; transform: translateY(-50%); font-size: 12px; }
+  .dpad-joy .dir.r { right: 14px; top: 50%; transform: translateY(-50%); font-size: 12px; }
+  .dpad-joy .stick {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 90px; height: 90px;
+    background: radial-gradient(circle at 40% 35%, #3a3a58, #2a2a40);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: #fff;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.05);
+    border: 1px solid #3a3a58;
+  }
+  .dpad-joy .ring {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 120px; height: 120px;
+    border: 2px solid #2a2a40;
+    border-radius: 50%;
+  }
+
+  /* ========== 9: Pie Segments ========== */
+  .dpad-pie {
+    width: 220px; height: 220px;
+    position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .dpad-pie .segment {
+    position: absolute;
+    width: 110px; height: 110px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: #8888bb;
+  }
+  .dpad-pie .segment:hover { filter: brightness(1.3); }
+  .dpad-pie .segment.u { top: 0; left: 0; width: 220px; height: 110px; background: #1e1e30; padding-bottom: 30px; }
+  .dpad-pie .segment.d { bottom: 0; left: 0; width: 220px; height: 110px; background: #222238; padding-top: 30px; }
+  .dpad-pie .segment.l { top: 0; left: 0; width: 110px; height: 220px; background: #1a1a2e; padding-right: 30px; }
+  .dpad-pie .segment.r { top: 0; right: 0; width: 110px; height: 220px; background: #202034; padding-left: 30px; }
+  .dpad-pie .ok {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 70px; height: 70px; background: #4a6cf7; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px; color: #fff;
+    box-shadow: 0 4px 16px rgba(74,108,247,0.4);
+    z-index: 5;
+  }
+  .dpad-pie .line-h {
+    position: absolute; top: 50%; left: 0; width: 100%; height: 1px;
+    background: #0a0a14; z-index: 3;
+  }
+  .dpad-pie .line-v {
+    position: absolute; top: 0; left: 50%; width: 1px; height: 100%;
+    background: #0a0a14; z-index: 3;
+  }
+
+  /* ========== 10: Glass Morphism ========== */
+  .dpad-glass {
+    width: 220px; height: 220px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    border-radius: 50%;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+  }
+  .dpad-glass .arr {
+    position: absolute;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: rgba(255,255,255,0.5);
+    backdrop-filter: blur(4px);
+  }
+  .dpad-glass .arr:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+  .dpad-glass .arr.u { width: 66px; height: 44px; top: 10px; left: 50%; transform: translateX(-50%); }
+  .dpad-glass .arr.d { width: 66px; height: 44px; bottom: 10px; left: 50%; transform: translateX(-50%); }
+  .dpad-glass .arr.l { width: 44px; height: 66px; left: 10px; top: 50%; transform: translateY(-50%); }
+  .dpad-glass .arr.r { width: 44px; height: 66px; right: 10px; top: 50%; transform: translateY(-50%); }
+  .dpad-glass .ok {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 64px; height: 64px;
+    background: rgba(74,108,247,0.3);
+    border: 1px solid rgba(74,108,247,0.5);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: #fff;
+    box-shadow: 0 4px 20px rgba(74,108,247,0.3);
+  }
+</style>
+</head>
+<body>
+
+<!-- 1: Current -->
+<div class="card">
+  <div class="tag">1 — Current</div>
+  <div class="desc">Your existing D-Pad. Circle background<br>with rectangular arrow buttons.</div>
+  <div class="dpad-current">
+    <div class="arr u">▲</div><div class="arr d">▼</div>
+    <div class="arr l">◄</div><div class="arr r">►</div>
+    <div class="ok">OK</div>
+  </div>
+</div>
+
+<!-- 2: Cross -->
+<div class="card">
+  <div class="tag">2 — Floating Cross</div>
+  <div class="desc">No background circle. Buttons float freely<br>in a cross pattern. Clean and modern.</div>
+  <div class="dpad-cross">
+    <div class="arm u">▲</div><div class="arm d">▼</div>
+    <div class="arm l">◄</div><div class="arm r">►</div>
+    <div class="ok">OK</div>
+  </div>
+</div>
+
+<!-- 3: Ring -->
+<div class="card">
+  <div class="tag">3 — Ring</div>
+  <div class="desc">Circular arrow buttons on a thin ring border.<br>Large OK center. Elegant and spacious.</div>
+  <div class="dpad-ring">
+    <div class="outer">
+      <div class="seg u">▲</div><div class="seg d">▼</div>
+      <div class="seg l">◄</div><div class="seg r">►</div>
+    </div>
+    <div class="ok">OK</div>
+  </div>
+</div>
+
+<!-- 4: Rounded Square -->
+<div class="card">
+  <div class="tag">4 — Rounded Square</div>
+  <div class="desc">Square background with large corner radius.<br>Same layout, different silhouette.</div>
+  <div class="dpad-square">
+    <div class="arr u">▲</div><div class="arr d">▼</div>
+    <div class="arr l">◄</div><div class="arr r">►</div>
+    <div class="ok">OK</div>
+  </div>
+</div>
+
+<!-- 5: Diamond -->
+<div class="card">
+  <div class="tag">5 — Diamond</div>
+  <div class="desc">Background rotated 45 degrees. Gives a<br>premium, unique feel. Buttons stay axis-aligned.</div>
+  <div class="dpad-diamond">
+    <div class="bg"></div>
+    <div class="arr u">▲</div><div class="arr d">▼</div>
+    <div class="arr l">◄</div><div class="arr r">►</div>
+    <div class="ok">OK</div>
+  </div>
+</div>
+
+<!-- 6: Minimal Dots -->
+<div class="card">
+  <div class="tag">6 — Minimal Circles</div>
+  <div class="desc">No background at all. Just five circular<br>buttons. Ultra-minimal and clean.</div>
+  <div class="dpad-dots">
+    <div class="dot u">▲</div><div class="dot d">▼</div>
+    <div class="dot l">◄</div><div class="dot r">►</div>
+    <div class="ok">OK</div>
+  </div>
+</div>
+
+<!-- 7: Neon Glow -->
+<div class="card">
+  <div class="tag">7 — Neon Glow</div>
+  <div class="desc">Outlined buttons with a glowing blue neon<br>effect. Futuristic and eye-catching.</div>
+  <div class="dpad-neon">
+    <div class="arr u">▲</div><div class="arr d">▼</div>
+    <div class="arr l">◄</div><div class="arr r">►</div>
+    <div class="ok">OK</div>
+  </div>
+</div>
+
+<!-- 8: Joystick -->
+<div class="card">
+  <div class="tag">8 — Joystick</div>
+  <div class="desc">Analog stick look with a raised center knob.<br>Direction labels instead of arrows. Gaming feel.</div>
+  <div class="dpad-joy">
+    <div class="dir u">▲</div><div class="dir d">▼</div>
+    <div class="dir l">◄</div><div class="dir r">►</div>
+    <div class="ring"></div>
+    <div class="stick">OK</div>
+  </div>
+</div>
+
+<!-- 9: Pie Segments -->
+<div class="card">
+  <div class="tag">9 — Pie Segments</div>
+  <div class="desc">Full circle split into 4 tap zones.<br>Large touch targets. No wasted space.</div>
+  <div class="dpad-pie">
+    <div class="segment u">▲</div>
+    <div class="segment d">▼</div>
+    <div class="segment l">◄</div>
+    <div class="segment r">►</div>
+    <div class="line-h"></div>
+    <div class="line-v"></div>
+    <div class="ok">OK</div>
+  </div>
+</div>
+
+<!-- 10: Glass -->
+<div class="card">
+  <div class="tag">10 — Glassmorphism</div>
+  <div class="desc">Frosted glass effect with subtle borders.<br>Semi-transparent buttons. Modern iOS feel.</div>
+  <div class="dpad-glass">
+    <div class="arr u">▲</div><div class="arr d">▼</div>
+    <div class="arr l">◄</div><div class="arr r">►</div>
+    <div class="ok">OK</div>
+  </div>
+</div>
+
+</body>
+</html>

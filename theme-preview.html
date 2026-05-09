@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartIR Remote - Theme Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 30px 20px;
+    color: #e8e8f0;
+  }
+
+  .wrapper {
+    text-align: center;
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #ccc;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 30px;
+  }
+
+  .phones-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .phone-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .theme-label {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Phone frame */
+  .phone {
+    width: 300px;
+    height: 620px;
+    border-radius: 36px;
+    padding: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  .phone-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 26px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 18px 16px;
+    position: relative;
+  }
+
+  /* Notch */
+  .notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 22px;
+    border-radius: 0 0 16px 16px;
+    z-index: 10;
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    padding: 2px 4px 12px;
+    opacity: 0.5;
+  }
+
+  /* TOP ROW */
+  .top-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: auto;
+    flex-shrink: 0;
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    font-family: inherit;
+  }
+  .btn:hover { transform: scale(1.05); }
+  .btn:active { transform: scale(0.95); }
+
+  .btn-top {
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+  }
+
+  .btn-top .btn-label {
+    display: none;
+  }
+
+  /* Theme switcher button */
+  .btn-theme {
+    position: relative;
+  }
+  .btn-theme .theme-icon {
+    font-size: 18px;
+  }
+
+  /* D-Pad */
+  .dpad-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    margin: auto 0;
+  }
+
+  .dpad {
+    width: 210px;
+    height: 210px;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dpad-zone {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .dpad-up {
+    top: 0; left: 0; right: 0; height: 38%;
+    clip-path: polygon(50% 0%, 100% 0%, 82% 50%, 18% 50%, 0% 0%);
+    border-radius: 105px 105px 0 0;
+    padding-top: 14px;
+  }
+  .dpad-down {
+    bottom: 0; left: 0; right: 0; height: 38%;
+    clip-path: polygon(18% 50%, 82% 50%, 100% 100%, 0% 100%);
+    border-radius: 0 0 105px 105px;
+    padding-bottom: 14px;
+  }
+  .dpad-left {
+    top: 0; left: 0; bottom: 0; width: 38%;
+    clip-path: polygon(0% 0%, 50% 18%, 50% 82%, 0% 100%);
+    border-radius: 105px 0 0 105px;
+    padding-left: 14px;
+  }
+  .dpad-right {
+    top: 0; right: 0; bottom: 0; width: 38%;
+    clip-path: polygon(50% 18%, 100% 0%, 100% 100%, 50% 82%);
+    border-radius: 0 105px 105px 0;
+    padding-right: 14px;
+  }
+
+  .dpad-ok {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 2;
+    border: none;
+    letter-spacing: 1px;
+    transition: background 0.15s;
+  }
+
+  .dpad-divider {
+    position: absolute;
+    z-index: 1;
+  }
+
+  /* Bottom Section */
+  .bottom-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 8px;
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+
+  .btn-mute {
+    width: 46px;
+    height: 46px;
+    font-size: 16px;
+    align-self: flex-start;
+  }
+
+  .controls-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .controls-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .btn-small {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  /* Arrows as CSS */
+  .arrow { font-size: 14px; opacity: 0.6; }
+
+  /* ============ THEME: DEFAULT ============ */
+  .theme-default .phone { background: #222; border: 2px solid #333; }
+  .theme-default .phone-inner { background: #111118; }
+  .theme-default .notch { background: #222; }
+  .theme-default .status-bar { color: #e8e8f0; }
+
+  .theme-default .btn-power {
+    background: #E53935;
+    color: white;
+    box-shadow: 0 4px 16px rgba(229, 57, 53, 0.4);
+  }
+  .theme-default .btn-nav {
+    background: #2C2C44;
+    color: #D0D0E8;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .theme-default .btn-theme-sw {
+    background: #2C2C44;
+    color: #D0D0E8;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  .theme-default .dpad { background: #111118; box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+  .theme-default .dpad-zone { background: #1E1E30; color: #8888BB; }
+  .theme-default .dpad-zone:hover { background: #2E2E48; }
+  .theme-default .dpad-ok { background: #3366CC; color: white; box-shadow: 0 2px 8px rgba(51,102,204,0.3); }
+  .theme-default .dpad-ok:hover { background: #2855AA; }
+  .theme-default .dpad-divider { background: #0A0A14; }
+
+  .theme-default .btn-mute {
+    background: #FF8F00;
+    color: white;
+    box-shadow: 0 4px 14px rgba(255, 143, 0, 0.35);
+  }
+  .theme-default .btn-ctrl {
+    background: #2A2A40;
+    color: #D0D0E8;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  }
+
+  /* ============ THEME: FC BARCELONA ============ */
+  .theme-barca .phone { background: #1a0a1e; border: 2px solid #5a1a3a; }
+  .theme-barca .phone-inner { background: #0f0a18; }
+  .theme-barca .notch { background: #1a0a1e; }
+  .theme-barca .status-bar { color: #e8d8f0; }
+  .theme-barca .theme-label { color: #CD9B1D; }
+
+  .theme-barca .btn-power {
+    background: #A50044;
+    color: #FECA2F;
+    box-shadow: 0 4px 16px rgba(165, 0, 68, 0.5);
+  }
+  .theme-barca .btn-nav {
+    background: #1a1035;
+    color: #c8b8e0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .theme-barca .btn-theme-sw {
+    background: #1a1035;
+    color: #FECA2F;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  .theme-barca .dpad { background: #0f0a18; box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+  .theme-barca .dpad-zone { background: #1a1035; color: #8070AA; }
+  .theme-barca .dpad-zone:hover { background: #2a1a50; }
+  .theme-barca .dpad-ok { background: #004D98; color: #FECA2F; box-shadow: 0 2px 10px rgba(0, 77, 152, 0.4); font-weight: 800; }
+  .theme-barca .dpad-ok:hover { background: #003870; }
+  .theme-barca .dpad-divider { background: #080510; }
+
+  .theme-barca .btn-mute {
+    background: #FECA2F;
+    color: #004D98;
+    box-shadow: 0 4px 14px rgba(254, 202, 47, 0.3);
+  }
+  .theme-barca .btn-ctrl {
+    background: #1a1035;
+    color: #c8b8e0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  }
+
+  /* ============ THEME: MUMBAI INDIANS ============ */
+  .theme-mi .phone { background: #0a1525; border: 2px solid #1a4a7a; }
+  .theme-mi .phone-inner { background: #060e1a; }
+  .theme-mi .notch { background: #0a1525; }
+  .theme-mi .status-bar { color: #d8e4f0; }
+  .theme-mi .theme-label { color: #D4AF37; }
+
+  .theme-mi .btn-power {
+    background: #D4AF37;
+    color: #003B7A;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+  }
+  .theme-mi .btn-nav {
+    background: #0C2340;
+    color: #7BB8E8;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .theme-mi .btn-theme-sw {
+    background: #0C2340;
+    color: #D4AF37;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  .theme-mi .dpad { background: #060e1a; box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+  .theme-mi .dpad-zone { background: #0C2340; color: #5A9FD4; }
+  .theme-mi .dpad-zone:hover { background: #143560; }
+  .theme-mi .dpad-ok { background: #004BA0; color: #D4AF37; box-shadow: 0 2px 10px rgba(0, 75, 160, 0.4); font-weight: 800; }
+  .theme-mi .dpad-ok:hover { background: #003878; }
+  .theme-mi .dpad-divider { background: #030810; }
+
+  .theme-mi .btn-mute {
+    background: #D4AF37;
+    color: #003B7A;
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+  }
+  .theme-mi .btn-ctrl {
+    background: #0C2340;
+    color: #7BB8E8;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  }
+
+  /* Color palette display */
+  .palette {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    cursor: default;
+  }
+  .swatch:hover::after {
+    content: attr(data-name);
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: #aaa;
+    white-space: nowrap;
+    background: #1a1a2e;
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+
+  /* Divider lines in dpad */
+  .div-tl-br {
+    top: 0; left: 0;
+    width: 141%;
+    height: 2px;
+    transform-origin: 0 0;
+    transform: rotate(45deg);
+  }
+  .div-tr-bl {
+    top: 0; right: 0;
+    width: 141%;
+    height: 2px;
+    transform-origin: 100% 0;
+    transform: rotate(-45deg);
+  }
+
+  /* Active theme indicator */
+  .active-indicator {
+    font-size: 11px;
+    margin-top: 10px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+  .theme-default .active-indicator { background: #2A2A40; color: #B0C6FF; }
+  .theme-barca .active-indicator { background: #1a1035; color: #FECA2F; }
+  .theme-mi .active-indicator { background: #0C2340; color: #D4AF37; }
+
+  @media (max-width: 1000px) {
+    .phones-row { gap: 24px; }
+    .phone { width: 270px; height: 570px; }
+    .dpad { width: 185px; height: 185px; }
+    .dpad-ok { width: 62px; height: 62px; font-size: 13px; }
+  }
+
+  @media (max-width: 700px) {
+    .phones-row { flex-direction: column; align-items: center; gap: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <h1>SmartIR Remote - Theme Preview</h1>
+  <p class="subtitle">Theme switcher button (palette icon) sits in the top row alongside Power, Input, Menu, Home</p>
+
+  <div class="phones-row">
+
+    <!-- ========== DEFAULT THEME ========== -->
+    <div class="phone-container theme-default">
+      <div class="theme-label" style="color: #B0C6FF;">Default Theme</div>
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="notch"></div>
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>&#x1F4F6; &#x1F50B;</span>
+          </div>
+
+          <!-- Top Row -->
+          <div class="top-row">
+            <button class="btn btn-top btn-power" title="Power">&#x23FB;</button>
+            <button class="btn btn-top btn-nav" title="Input">&#x2398;</button>
+            <button class="btn btn-top btn-nav" title="Menu">&#x2630;</button>
+            <button class="btn btn-top btn-nav" title="Home">&#x2302;</button>
+            <button class="btn btn-top btn-theme-sw" title="Theme Switcher">&#x1F3A8;</button>
+          </div>
+
+          <!-- D-Pad -->
+          <div class="dpad-area">
+            <div class="dpad">
+              <div class="dpad-zone dpad-up"><span class="arrow">&#x25B2;</span></div>
+              <div class="dpad-zone dpad-down"><span class="arrow">&#x25BC;</span></div>
+              <div class="dpad-zone dpad-left"><span class="arrow">&#x25C0;</span></div>
+              <div class="dpad-zone dpad-right"><span class="arrow">&#x25B6;</span></div>
+              <div class="dpad-divider div-tl-br"></div>
+              <div class="dpad-divider div-tr-bl"></div>
+              <button class="dpad-ok">OK</button>
+            </div>
+          </div>
+
+          <!-- Bottom Section -->
+          <div class="bottom-section">
+            <button class="btn btn-mute" title="Mute">&#x1F507;</button>
+            <div class="controls-right">
+              <div class="controls-row">
+                <button class="btn btn-small btn-ctrl" title="Vol+">+</button>
+              </div>
+              <div class="controls-row">
+                <button class="btn btn-small btn-ctrl" title="Back">&#x2190;</button>
+                <button class="btn btn-small btn-ctrl" title="Vol-">&minus;</button>
+              </div>
+              <div class="controls-row">
+                <button class="btn btn-small btn-ctrl" title="Play">&#x25B6;</button>
+                <button class="btn btn-small btn-ctrl" title="Rew">&#x23EA;</button>
+                <button class="btn btn-small btn-ctrl" title="Fwd">&#x23E9;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="active-indicator">Current Theme</div>
+      <div class="palette">
+        <div class="swatch" style="background:#111118;" data-name="Surface"></div>
+        <div class="swatch" style="background:#1E1E30;" data-name="Container"></div>
+        <div class="swatch" style="background:#2A2A40;" data-name="Button"></div>
+        <div class="swatch" style="background:#3366CC;" data-name="OK Blue"></div>
+        <div class="swatch" style="background:#B0C6FF;" data-name="Primary"></div>
+        <div class="swatch" style="background:#E53935;" data-name="Power Red"></div>
+        <div class="swatch" style="background:#FF8F00;" data-name="Mute Amber"></div>
+        <div class="swatch" style="background:#E8E8F0;" data-name="Text"></div>
+      </div>
+    </div>
+
+    <!-- ========== FC BARCELONA THEME ========== -->
+    <div class="phone-container theme-barca">
+      <div class="theme-label">FC Barcelona</div>
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="notch"></div>
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>&#x1F4F6; &#x1F50B;</span>
+          </div>
+
+          <!-- Top Row -->
+          <div class="top-row">
+            <button class="btn btn-top btn-power" title="Power">&#x23FB;</button>
+            <button class="btn btn-top btn-nav" title="Input">&#x2398;</button>
+            <button class="btn btn-top btn-nav" title="Menu">&#x2630;</button>
+            <button class="btn btn-top btn-nav" title="Home">&#x2302;</button>
+            <button class="btn btn-top btn-theme-sw" title="Theme Switcher">&#x1F3A8;</button>
+          </div>
+
+          <!-- D-Pad -->
+          <div class="dpad-area">
+            <div class="dpad">
+              <div class="dpad-zone dpad-up"><span class="arrow">&#x25B2;</span></div>
+              <div class="dpad-zone dpad-down"><span class="arrow">&#x25BC;</span></div>
+              <div class="dpad-zone dpad-left"><span class="arrow">&#x25C0;</span></div>
+              <div class="dpad-zone dpad-right"><span class="arrow">&#x25B6;</span></div>
+              <div class="dpad-divider div-tl-br"></div>
+              <div class="dpad-divider div-tr-bl"></div>
+              <button class="dpad-ok">OK</button>
+            </div>
+          </div>
+
+          <!-- Bottom Section -->
+          <div class="bottom-section">
+            <button class="btn btn-mute" title="Mute">&#x1F507;</button>
+            <div class="controls-right">
+              <div class="controls-row">
+                <button class="btn btn-small btn-ctrl" title="Vol+">+</button>
+              </div>
+              <div class="controls-row">
+                <button class="btn btn-small btn-ctrl" title="Back">&#x2190;</button>
+                <button class="btn btn-small btn-ctrl" title="Vol-">&minus;</button>
+              </div>
+              <div class="controls-row">
+                <button class="btn btn-small btn-ctrl" title="Play">&#x25B6;</button>
+                <button class="btn btn-small btn-ctrl" title="Rew">&#x23EA;</button>
+                <button class="btn btn-small btn-ctrl" title="Fwd">&#x23E9;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="active-indicator">Blaugrana</div>
+      <div class="palette">
+        <div class="swatch" style="background:#0f0a18;" data-name="Surface"></div>
+        <div class="swatch" style="background:#1a1035;" data-name="Container"></div>
+        <div class="swatch" style="background:#A50044;" data-name="Garnet"></div>
+        <div class="swatch" style="background:#004D98;" data-name="Blau"></div>
+        <div class="swatch" style="background:#FECA2F;" data-name="Gold"></div>
+        <div class="swatch" style="background:#c8b8e0;" data-name="Text"></div>
+      </div>
+    </div>
+
+    <!-- ========== MUMBAI INDIANS THEME ========== -->
+    <div class="phone-container theme-mi">
+      <div class="theme-label">Mumbai Indians</div>
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="notch"></div>
+          <div class="status-bar">
+            <span>9:41</span>
+            <span>&#x1F4F6; &#x1F50B;</span>
+          </div>
+
+          <!-- Top Row -->
+          <div class="top-row">
+            <button class="btn btn-top btn-power" title="Power">&#x23FB;</button>
+            <button class="btn btn-top btn-nav" title="Input">&#x2398;</button>
+            <button class="btn btn-top btn-nav" title="Menu">&#x2630;</button>
+            <button class="btn btn-top btn-nav" title="Home">&#x2302;</button>
+            <button class="btn btn-top btn-theme-sw" title="Theme Switcher">&#x1F3A8;</button>
+          </div>
+
+          <!-- D-Pad -->
+          <div class="dpad-area">
+            <div class="dpad">
+              <div class="dpad-zone dpad-up"><span class="arrow">&#x25B2;</span></div>
+              <div class="dpad-zone dpad-down"><span class="arrow">&#x25BC;</span></div>
+              <div class="dpad-zone dpad-left"><span class="arrow">&#x25C0;</span></div>
+              <div class="dpad-zone dpad-right"><span class="arrow">&#x25B6;</span></div>
+              <div class="dpad-divider div-tl-br"></div>
+              <div class="dpad-divider div-tr-bl"></div>
+              <button class="dpad-ok">OK</button>
+            </div>
+          </div>
+
+          <!-- Bottom Section -->
+          <div class="bottom-section">
+            <button class="btn btn-mute" title="Mute">&#x1F507;</button>
+            <div class="controls-right">
+              <div class="controls-row">
+                <button class="btn btn-small btn-ctrl" title="Vol+">+</button>
+              </div>
+              <div class="controls-row">
+                <button class="btn btn-small btn-ctrl" title="Back">&#x2190;</button>
+                <button class="btn btn-small btn-ctrl" title="Vol-">&minus;</button>
+              </div>
+              <div class="controls-row">
+                <button class="btn btn-small btn-ctrl" title="Play">&#x25B6;</button>
+                <button class="btn btn-small btn-ctrl" title="Rew">&#x23EA;</button>
+                <button class="btn btn-small btn-ctrl" title="Fwd">&#x23E9;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="active-indicator">Paltan</div>
+      <div class="palette">
+        <div class="swatch" style="background:#060e1a;" data-name="Surface"></div>
+        <div class="swatch" style="background:#0C2340;" data-name="MI Blue"></div>
+        <div class="swatch" style="background:#004BA0;" data-name="Accent Blue"></div>
+        <div class="swatch" style="background:#D4AF37;" data-name="Gold"></div>
+        <div class="swatch" style="background:#7BB8E8;" data-name="Light Blue"></div>
+        <div class="swatch" style="background:#d8e4f0;" data-name="Text"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Theme Switcher Popup Preview -->
+  <div style="margin-top: 50px;">
+    <h2 style="font-size: 18px; color: #aaa; margin-bottom: 20px;">Theme Switcher Popup (appears on tapping the palette button)</h2>
+    <div style="display: flex; justify-content: center;">
+      <div style="background: #1E1E30; border-radius: 20px; padding: 20px 24px; width: 280px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.06);">
+        <div style="font-size: 14px; font-weight: 600; color: #e8e8f0; margin-bottom: 16px; text-align: center;">Choose Theme</div>
+
+        <!-- Default -->
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #28283C; margin-bottom: 8px; cursor: pointer; border: 2px solid #3366CC;">
+          <div style="display: flex; gap: 4px;">
+            <div style="width: 16px; height: 16px; border-radius: 4px; background: #3366CC;"></div>
+            <div style="width: 16px; height: 16px; border-radius: 4px; background: #E53935;"></div>
+            <div style="width: 16px; height: 16px; border-radius: 4px; background: #FF8F00;"></div>
+          </div>
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: #e8e8f0;">Default</div>
+            <div style="font-size: 10px; color: #9898A8;">Current theme</div>
+          </div>
+          <div style="margin-left: auto; color: #3366CC; font-size: 16px;">&#x2713;</div>
+        </div>
+
+        <!-- Barcelona -->
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #28283C; margin-bottom: 8px; cursor: pointer; border: 2px solid transparent;">
+          <div style="display: flex; gap: 4px;">
+            <div style="width: 16px; height: 16px; border-radius: 4px; background: #A50044;"></div>
+            <div style="width: 16px; height: 16px; border-radius: 4px; background: #004D98;"></div>
+            <div style="width: 16px; height: 16px; border-radius: 4px; background: #FECA2F;"></div>
+          </div>
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: #e8e8f0;">FC Barcelona</div>
+            <div style="font-size: 10px; color: #9898A8;">Blaugrana</div>
+          </div>
+        </div>
+
+        <!-- Mumbai Indians -->
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #28283C; cursor: pointer; border: 2px solid transparent;">
+          <div style="display: flex; gap: 4px;">
+            <div style="width: 16px; height: 16px; border-radius: 4px; background: #004BA0;"></div>
+            <div style="width: 16px; height: 16px; border-radius: 4px; background: #D4AF37;"></div>
+            <div style="width: 16px; height: 16px; border-radius: 4px; background: #7BB8E8;"></div>
+          </div>
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: #e8e8f0;">Mumbai Indians</div>
+            <div style="font-size: 10px; color: #9898A8;">Paltan</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
