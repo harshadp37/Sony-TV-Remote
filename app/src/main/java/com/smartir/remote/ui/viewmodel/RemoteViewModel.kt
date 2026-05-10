@@ -5,6 +5,9 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.viewModelScope
 import com.smartir.remote.haptics.HapticManager
 import com.smartir.remote.adb.AdbConnectionManager
@@ -35,9 +38,21 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
         private const val REPEAT_INTERVAL_MS = 200L
     }
 
+    private val lifecycleObserver = LifecycleEventObserver { _, event ->
+        if (event == Lifecycle.Event.ON_START) {
+            checkAndReconnect()
+        }
+    }
+
     init {
         Log.d(TAG, "IR blaster available: ${irTransmitter.hasIrEmitter}")
         autoConnect()
+        ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        ProcessLifecycleOwner.get().lifecycle.removeObserver(lifecycleObserver)
     }
 
     private fun autoConnect() {
@@ -47,6 +62,37 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
                 Log.d(TAG, "Auto-connecting to last known TV: $lastIp")
                 adbManager.connect(lastIp)
             }
+        }
+    }
+
+    /**
+     * Called when the app comes back to the foreground.
+     * If we were previously connected, check if the connection is still alive
+     * and silently reconnect if it has gone stale.
+     */
+    private fun checkAndReconnect() {
+        val currentState = adbState.value
+        val ip = when (currentState) {
+            is AdbConnectionState.Connected -> currentState.ip
+            is AdbConnectionState.Error -> null
+            else -> return
+        }
+
+        viewModelScope.launch {
+            // For Error state, try the last saved IP
+            val targetIp = ip ?: adbManager.preferences.getLastIp() ?: return@launch
+
+            if (currentState is AdbConnectionState.Connected) {
+                if (adbManager.isConnectionAlive()) {
+                    Log.d(TAG, "Connection still alive after resume")
+                    return@launch
+                }
+                Log.d(TAG, "Connection stale after resume, reconnecting to $targetIp")
+            } else {
+                Log.d(TAG, "Reconnecting after error to $targetIp")
+            }
+
+            adbManager.connect(targetIp)
         }
     }
 

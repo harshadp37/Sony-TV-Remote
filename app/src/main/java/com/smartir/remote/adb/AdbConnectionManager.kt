@@ -137,6 +137,23 @@ class AdbConnectionManager(private val context: Context) {
         }
     }
 
+    /**
+     * Checks if the current connection is still alive by sending a test command.
+     * Returns true if healthy, false if dead/disconnected.
+     */
+    suspend fun isConnectionAlive(): Boolean {
+        val connection = dadb ?: return false
+        return withContext(Dispatchers.IO) {
+            try {
+                connection.shell("echo ping")
+                true
+            } catch (e: Exception) {
+                Log.w(TAG, "Connection health check failed: ${e.message}")
+                false
+            }
+        }
+    }
+
     suspend fun discoverTvs(): List<String> {
         return SubnetScanner.scan(context)
     }
