@@ -24,6 +24,44 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Defines an acceleration stage for hold-to-repeat.
+ * @param thresholdMs elapsed hold time (ms) at which this stage activates
+ * @param intervalMs delay between ticks at this stage
+ * @param burstCount number of key events sent per tick
+ */
+data class AccelStage(val thresholdMs: Long, val intervalMs: Long, val burstCount: Int)
+
+/**
+ * Acceleration profiles for different button types.
+ * Stages must be ordered by thresholdMs ascending.
+ */
+object RepeatProfiles {
+    /** Volume: ramps up to fast single-step, then adds bursts for big jumps */
+    val VOLUME = listOf(
+        AccelStage(thresholdMs = 0, intervalMs = 200, burstCount = 1),
+        AccelStage(thresholdMs = 800, intervalMs = 100, burstCount = 1),
+        AccelStage(thresholdMs = 1500, intervalMs = 60, burstCount = 1),
+        AccelStage(thresholdMs = 2500, intervalMs = 50, burstCount = 2)
+    )
+
+    /** D-Pad: conservative first (menus), aggressive later (video seeking) */
+    val DPAD = listOf(
+        AccelStage(thresholdMs = 0, intervalMs = 200, burstCount = 1),
+        AccelStage(thresholdMs = 1000, intervalMs = 120, burstCount = 1),
+        AccelStage(thresholdMs = 2000, intervalMs = 80, burstCount = 2),
+        AccelStage(thresholdMs = 3000, intervalMs = 60, burstCount = 3)
+    )
+
+    /** Rewind/Fast Forward: aggressive from the start — only used in playback */
+    val MEDIA_SEEK = listOf(
+        AccelStage(thresholdMs = 0, intervalMs = 180, burstCount = 1),
+        AccelStage(thresholdMs = 500, intervalMs = 100, burstCount = 2),
+        AccelStage(thresholdMs = 1500, intervalMs = 60, burstCount = 3),
+        AccelStage(thresholdMs = 3000, intervalMs = 50, burstCount = 4)
+    )
+}
+
 class RemoteViewModel(application: Application) : AndroidViewModel(application) {
 
     val irTransmitter = IrTransmitter(application)
@@ -35,7 +73,18 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
 
     companion object {
         private const val TAG = "SmartIR"
-        private const val REPEAT_INTERVAL_MS = 200L
+    }
+
+    /** Pick the acceleration profile based on the command being repeated. */
+    private fun profileFor(command: SonyIrCommand): List<AccelStage> = when (command) {
+        SonyCodes.VOLUME_UP, SonyCodes.VOLUME_DOWN -> RepeatProfiles.VOLUME
+        SonyCodes.REWIND, SonyCodes.FAST_FORWARD -> RepeatProfiles.MEDIA_SEEK
+        else -> RepeatProfiles.DPAD
+    }
+
+    /** Returns the active stage for the given elapsed hold time. */
+    private fun currentStage(profile: List<AccelStage>, elapsedMs: Long): AccelStage {
+        return profile.last { it.thresholdMs <= elapsedMs }
     }
 
     private val lifecycleObserver = LifecycleEventObserver { _, event ->
@@ -131,23 +180,34 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
-     * Start hold-to-repeat: sends key events at ~200ms intervals.
+     * Start hold-to-repeat with acceleration.
+     * The longer you hold, the faster events are sent (and in bursts for seeking).
      * Uses ADB keyevent when connected, IR 3-frame bursts otherwise.
      * Cancels any previous repeat job (only one signal at a time).
      */
     fun startRepeat(command: SonyIrCommand, view: View) {
         repeatJob?.cancel()
         repeatJob = viewModelScope.launch {
+            val profile = profileFor(command)
+            val startTime = System.currentTimeMillis()
+
             // Send initial press immediately
             sendSinglePress(command)
             withContext(Dispatchers.Main) {
                 HapticManager.tick(view)
             }
 
-            // Repeat so the TV registers each as a new press
             while (isActive) {
-                delay(REPEAT_INTERVAL_MS)
-                sendSinglePress(command)
+                val elapsed = System.currentTimeMillis() - startTime
+                val stage = currentStage(profile, elapsed)
+
+                delay(stage.intervalMs)
+
+                // Send burst of events for this stage
+                repeat(stage.burstCount) {
+                    if (!isActive) return@repeat
+                    sendSinglePress(command)
+                }
                 withContext(Dispatchers.Main) {
                     HapticManager.tick(view)
                 }
