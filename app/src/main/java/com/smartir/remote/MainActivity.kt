@@ -5,6 +5,7 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -60,6 +61,14 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { innerPadding ->
+                    BackHandler(enabled = currentScreen != Screen.Remote) {
+                        currentScreen = when (currentScreen) {
+                            Screen.AppShortcuts -> Screen.Settings
+                            Screen.Settings -> Screen.Remote
+                            else -> Screen.Remote
+                        }
+                    }
+
                     when (currentScreen) {
                         Screen.Remote -> RemoteScreen(
                             viewModel = viewModel,

@@ -137,21 +137,6 @@ class AdbConnectionManager(private val context: Context) {
         }
     }
 
-    suspend fun sendLongPressKeyEvent(keyCode: String): Boolean {
-        val connection = dadb ?: return false
-        return withContext(Dispatchers.IO) {
-            try {
-                connection.shell("input keyevent --longpress $keyCode")
-                Log.d(TAG, "ADB long-press keyevent: $keyCode")
-                true
-            } catch (e: Exception) {
-                Log.e(TAG, "ADB long-press keyevent failed: ${e.message}", e)
-                handleConnectionError(e)
-                false
-            }
-        }
-    }
-
     /**
      * Checks if the current connection is still alive by sending a test command.
      * Returns true if healthy, false if dead/disconnected.
