@@ -201,6 +201,29 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Send a long-press key event. Uses ADB --longpress when connected;
+     * falls back to a burst of IR frames for the IR path.
+     */
+    fun sendLongPress(command: SonyIrCommand, view: View) {
+        viewModelScope.launch {
+            val useAdb = adbState.value is AdbConnectionState.Connected && command.adbKeyCode != null
+            Log.d(TAG, "Long-press: ${command.name} via ${if (useAdb) "ADB" else "IR"}")
+            try {
+                if (useAdb) {
+                    adbManager.sendLongPressKeyEvent(command.adbKeyCode!!)
+                } else {
+                    irTransmitter.transmit(command, singleFrame = false)
+                }
+                withContext(Dispatchers.Main) {
+                    HapticManager.confirm(view)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Long-press failed: ${e.message}", e)
+            }
+        }
+    }
+
+    /**
      * Start hold-to-repeat with acceleration.
      * The longer you hold, the faster events are sent (and in bursts for seeking).
      * Uses ADB keyevent when connected, IR 3-frame bursts otherwise.

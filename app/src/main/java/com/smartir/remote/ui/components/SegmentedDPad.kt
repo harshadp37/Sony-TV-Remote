@@ -24,10 +24,14 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import com.smartir.remote.haptics.HapticManager
 import com.smartir.remote.ir.SonyCodes
 import com.smartir.remote.ir.SonyIrCommand
 import com.smartir.remote.ui.viewmodel.RemoteViewModel
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.abs
+
+private const val LONG_PRESS_TIMEOUT_MS = 500L
 
 private enum class DPadZone { UP, DOWN, LEFT, RIGHT, OK, NONE }
 
@@ -92,23 +96,43 @@ fun SegmentedDPad(
 
                     pressedZone = zone
                     val command = zoneToCommand(zone) ?: return@awaitEachGesture
-                    val isDirectional = zone != DPadZone.OK
 
-                    if (isDirectional) {
+                    if (zone != DPadZone.OK) {
+                        // Directional: hold-to-repeat with acceleration
                         viewModel.startRepeat(command, view)
-                    } else {
-                        viewModel.sendCommand(command, view)
-                    }
-
-                    try {
-                        do {
-                            val event = awaitPointerEvent()
-                        } while (event.changes.any { it.pressed })
-                    } finally {
-                        if (isDirectional) {
+                        try {
+                            do {
+                                val event = awaitPointerEvent()
+                            } while (event.changes.any { it.pressed })
+                        } finally {
                             viewModel.stopRepeat()
+                            pressedZone = DPadZone.NONE
                         }
-                        pressedZone = DPadZone.NONE
+                    } else {
+                        // OK button: detect short tap vs long press
+                        HapticManager.tick(view)
+                        try {
+                            val releasedBeforeTimeout = withTimeoutOrNull(LONG_PRESS_TIMEOUT_MS) {
+                                do {
+                                    val event = awaitPointerEvent()
+                                } while (event.changes.any { it.pressed })
+                                true
+                            }
+
+                            if (releasedBeforeTimeout == true) {
+                                // Short tap — send normal key event
+                                viewModel.sendCommand(command, view)
+                            } else {
+                                // Long press — send long-press key event
+                                viewModel.sendLongPress(command, view)
+                                // Wait for finger release
+                                do {
+                                    val event = awaitPointerEvent()
+                                } while (event.changes.any { it.pressed })
+                            }
+                        } finally {
+                            pressedZone = DPadZone.NONE
+                        }
                     }
                 }
             }
