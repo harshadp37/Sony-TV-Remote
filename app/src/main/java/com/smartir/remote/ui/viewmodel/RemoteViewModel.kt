@@ -13,13 +13,20 @@ import com.smartir.remote.haptics.HapticManager
 import com.smartir.remote.adb.AdbConnectionManager
 import com.smartir.remote.adb.AdbConnectionState
 import com.smartir.remote.adb.TvApp
+import com.smartir.remote.adb.TvApps
+import com.smartir.remote.data.AppPreferences
+import com.smartir.remote.data.CustomApp
+import com.smartir.remote.data.toTvApp
 import com.smartir.remote.ir.IrTransmitter
 import com.smartir.remote.ir.SonyCodes
 import com.smartir.remote.ir.SonyIrCommand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -67,6 +74,20 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
     val irTransmitter = IrTransmitter(application)
     val adbManager = AdbConnectionManager(application)
     val adbState: StateFlow<AdbConnectionState> = adbManager.state
+    val appPreferences = AppPreferences(application)
+
+    val selectedApps: StateFlow<List<TvApp>> = combine(
+        appPreferences.selectedAppIdsFlow(),
+        appPreferences.customAppsFlow()
+    ) { ids, customApps ->
+        val customMap = customApps.associateBy { it.id }
+        ids.mapNotNull { id ->
+            TvApps.findById(id) ?: customMap[id]?.toTvApp()
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val customApps: StateFlow<List<CustomApp>> = appPreferences.customAppsFlow()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private var repeatJob: Job? = null
     private val app = application
@@ -267,6 +288,35 @@ class RemoteViewModel(application: Application) : AndroidViewModel(application) 
             withContext(Dispatchers.Main) {
                 onResult(ips)
             }
+        }
+    }
+
+    // --- App shortcut management ---
+
+    fun saveSelectedAppIds(ids: List<String>) {
+        viewModelScope.launch {
+            appPreferences.saveSelectedAppIds(ids)
+        }
+    }
+
+    fun addCustomApp(name: String, packageName: String, colorHex: Long) {
+        viewModelScope.launch {
+            val id = "custom_${packageName.replace('.', '_')}"
+            val current = customApps.value.toMutableList()
+            if (current.none { it.id == id }) {
+                current.add(CustomApp(id = id, name = name, packageName = packageName, colorHex = colorHex))
+                appPreferences.saveCustomApps(current)
+            }
+        }
+    }
+
+    fun removeCustomApp(customApp: CustomApp) {
+        viewModelScope.launch {
+            val updatedCustom = customApps.value.filter { it.id != customApp.id }
+            appPreferences.saveCustomApps(updatedCustom)
+            // Also remove from selected if present
+            val updatedIds = selectedApps.value.map { it.id }.filter { it != customApp.id }
+            appPreferences.saveSelectedAppIds(updatedIds)
         }
     }
 }
